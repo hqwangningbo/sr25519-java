@@ -1,113 +1,64 @@
 package com.wangningbo;
 
+import com.wangningbo.pojo.DecodeResult;
+import com.wangningbo.utils.CryptoUtils;
 import com.wangningbo.utils.HexUtils;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
-import javax.swing.text.Utilities;
-import java.util.Arrays;
-import java.util.List;
-
 class SR25519Test {
+
     @Test
-    void get_seed_from_code() {
-        String expected_seed="44e9d125f037ac1d51f0a7d3649689d422c2af8b1ec8e00d71db4d7bf6d127e33f50c3d5c84fa3e5399c72d6cbbbbc4a49bf76f76d952f479d74655a2ef2d453";
-        String[] s = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about".split(" ");
-        List<String> words = Arrays.asList(s);
-        byte[] seedTest = HexUtils.toSeed(words, "ss");
-        System.out.println("seedTest:" + HexUtils.bytesToHex(seedTest));
+    void decodePkcs8(){
+        String en = "6/VMM3CoGBnloEtQolYMu5ab2T3XhqVExekzFS+2+CQAgAAAAQAAAAgAAAAUN7n1xAGYt1YQylOp+eynAA6qn9qkwy/Flm4d84llvTY9mRY1Q5zrkDiL73kN/uZQMWZqsS1blxLYwC5ckVjOFHsQM8m2a42AzsuCYcdF2ClnOIM7XrdH/H5jOqFzJ8zVF8JJh0q1D3bAxq+cVuGYq5c/FLSvze3/KNGV6Q/VLjO6H9/VzMDPrRczaN5vEn/eStGEWXesji11Of4r";
+        String password = "LIUHONGQI321";
+        CryptoUtils.decodePkcs8(en,password);
     }
     @Test
-    void sr25519_ext_sr_from_seed(){
-        String expected_seed="44e9d125f037ac1d51f0a7d3649689d422c2af8b1ec8e00d71db4d7bf6d127e33f50c3d5c84fa3e5399c72d6cbbbbc4a49bf76f76d952f479d74655a2ef2d453";
-        SR25519 sr25519 = new SR25519();
+    void decodeFromSeed(){
         String seed = "fac7959dbfe72f052e5a0c3c8d6530f202b02fd8f9f5ca3580ec8deb7797479e";
-        byte[] keypair = new byte[SR25519.SR25519_KEYPAIR_SIZE];
-        sr25519.sr25519_ext_sr_from_seed(keypair, HexUtils.hexToBytes(seed));
-        System.out.println(keypair.length);
-        System.out.println("keypair:"+ HexUtils.bytesToHex(keypair));
-        byte[] privateKey = new byte[SR25519.SR25519_SECRET_SIZE];
-        byte[] publicKey = new byte[SR25519.SR25519_PUBLIC_SIZE];
-        System.arraycopy(keypair,0,privateKey,0,SR25519.SR25519_SECRET_SIZE);
-        System.arraycopy(keypair,SR25519.SR25519_SECRET_SIZE,publicKey,0,SR25519.SR25519_PUBLIC_SIZE);
-        System.out.println("privateKey:"+HexUtils.bytesToHex(privateKey));
-        System.out.println("publicKey:"+HexUtils.bytesToHex(publicKey));
+        CryptoUtils.decodeFromSeed(seed);
     }
     @Test
-    void sr25519_ext_sr_sign(){
-        SR25519 sr25519 = new SR25519();
-        String seed = "fac7959dbfe72f052e5a0c3c8d6530f202b02fd8f9f5ca3580ec8deb7797479e";
-        byte[] keypair = new byte[SR25519.SR25519_KEYPAIR_SIZE];
-        sr25519.sr25519_ext_sr_from_seed(keypair, HexUtils.hexToBytes(seed));
-        System.out.println("keypair:"+ HexUtils.bytesToHex(keypair));
-        byte[] privateKey = new byte[SR25519.SR25519_SECRET_SIZE];
-        byte[] publicKey = new byte[SR25519.SR25519_PUBLIC_SIZE];
-        System.arraycopy(keypair,0,privateKey,0,SR25519.SR25519_SECRET_SIZE);
-        System.arraycopy(keypair,SR25519.SR25519_SECRET_SIZE,publicKey,0,SR25519.SR25519_PUBLIC_SIZE);
-        System.out.println("privateKey:"+HexUtils.bytesToHex(privateKey));
-        System.out.println("publicKey:"+HexUtils.bytesToHex(publicKey));
-        String message = "hello";
-        byte[] sign = new byte[SR25519.SR25519_SIGNATURE_SIZE];
-        sr25519.sr25519_ext_sr_sign(
-                sign,
-                publicKey,
-                privateKey,
-                message.getBytes(),
-                message.getBytes().length
-        );
+    void decodeFromMnemonic(){
+        String mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
+        String password = "";
+        DecodeResult decodeResult = CryptoUtils.decodeFromMnemonic(mnemonic, password);
+        System.out.println(HexUtils.bytesToHex(decodeResult.getPrivateKey()));
+        System.out.println(HexUtils.bytesToHex(decodeResult.getPublicKey()));
+    }
+    @Test
+    void sign(){
+        String mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
+        String password = "";
+        DecodeResult decodeResult = CryptoUtils.decodeFromMnemonic(mnemonic, password);
+        byte[] sign = CryptoUtils.sign(decodeResult, "hello");
         System.out.println("signature:"+HexUtils.bytesToHex(sign));
-
     }
     @Test
-    void sr25519_verify(){
-        String expected_seed="44e9d125f037ac1d51f0a7d3649689d422c2af8b1ec8e00d71db4d7bf6d127e33f50c3d5c84fa3e5399c72d6cbbbbc4a49bf76f76d952f479d74655a2ef2d453";
-        SR25519 sr25519 = new SR25519();
-        String seed = "fac7959dbfe72f052e5a0c3c8d6530f202b02fd8f9f5ca3580ec8deb7797479e";
-        byte[] keypair = new byte[SR25519.SR25519_KEYPAIR_SIZE];
-        sr25519.sr25519_ext_sr_from_seed(keypair, HexUtils.hexToBytes(seed));
-        System.out.println("keypair:"+ HexUtils.bytesToHex(keypair));
-        byte[] privateKey = new byte[SR25519.SR25519_SECRET_SIZE];
-        byte[] publicKey = new byte[SR25519.SR25519_PUBLIC_SIZE];
-        System.arraycopy(keypair,0,privateKey,0,SR25519.SR25519_SECRET_SIZE);
-        System.arraycopy(keypair,SR25519.SR25519_SECRET_SIZE,publicKey,0,SR25519.SR25519_PUBLIC_SIZE);
-        System.out.println("privateKey:"+HexUtils.bytesToHex(privateKey));
-        System.out.println("publicKey:"+HexUtils.bytesToHex(publicKey));
-
-        String message = "hello";
-        byte[] sign = new byte[SR25519.SR25519_SIGNATURE_SIZE];
-        sr25519.sr25519_ext_sr_sign(
-                sign,
-                publicKey,
-                privateKey,
-                message.getBytes(),
-                message.getBytes().length
-        );
+    void verify(){
+        String mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
+        String password = "";
+        DecodeResult decodeResult = CryptoUtils.decodeFromMnemonic(mnemonic, password);
+        byte[] sign = CryptoUtils.sign(decodeResult, "hello");
         System.out.println("signature:"+HexUtils.bytesToHex(sign));
-
-        boolean result = sr25519.sr25519_ext_sr_verify(
-                sign,
-                message.getBytes(),
-                message.getBytes().length,
-                publicKey
-        );
-
+        boolean result = CryptoUtils.verify(HexUtils.bytesToHex(sign), "hello", HexUtils.bytesToHex(decodeResult.getPublicKey()));
         System.out.println(result);
     }
 
     @Test
-    void call_verify_known_message(){
-        SR25519 sr25519 = new SR25519();
-        String message = "I hereby verify that I control 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY";
-        String sign = "1037eb7e51613d0dcf5930ae518819c87d655056605764840d9280984e1b7063c4566b55bf292fcab07b369d01095879b50517beca4d26e6a65866e25fec0d83";
-        String publicKey = "d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d";
-        boolean result = sr25519.sr25519_ext_sr_verify(
-                HexUtils.hexToBytes(sign),
-                message.getBytes(),
-                message.getBytes().length,
-                HexUtils.hexToBytes(publicKey)
-        );
-        System.out.println(result);
-
+    void signJsToVerify(){
+        String encoded = "6/VMM3CoGBnloEtQolYMu5ab2T3XhqVExekzFS+2+CQAgAAAAQAAAAgAAAAUN7n1xAGYt1YQylOp+eynAA6qn9qkwy/Flm4d84llvTY9mRY1Q5zrkDiL73kN/uZQMWZqsS1blxLYwC5ckVjOFHsQM8m2a42AzsuCYcdF2ClnOIM7XrdH/H5jOqFzJ8zVF8JJh0q1D3bAxq+cVuGYq5c/FLSvze3/KNGV6Q/VLjO6H9/VzMDPrRczaN5vEn/eStGEWXesji11Of4r";
+        String password = "LIUHONGQI321";
+        DecodeResult decodeResult = CryptoUtils.decodePkcs8(encoded, password);
+        byte[] sign = CryptoUtils.sign(decodeResult, "hello");
+        System.out.println(HexUtils.bytesToHex(sign));
+    }
+    @Test
+    void encodeAddress(){
+        byte prefix = 42;
+        String publicKey = "7263fce9f5b7bd6fca421c081860a69c8f0ef7965c1e7f9de80660d7270df55b";
+        String address = CryptoUtils.encodeAddress(HexUtils.hexToBytes(publicKey), prefix);
+        System.out.println(address);
     }
 
 }

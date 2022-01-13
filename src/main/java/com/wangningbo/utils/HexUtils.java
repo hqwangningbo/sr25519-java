@@ -1,13 +1,5 @@
 package com.wangningbo.utils;
 
-
-import com.google.common.base.Stopwatch;
-import org.bitcoinj.crypto.PBKDF2SHA512;
-
-import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-
 public class HexUtils {
 
     /**
@@ -95,29 +87,5 @@ public class HexUtils {
                     .append(Character.forDigit((b & 0x0F), 16));
         }
         return hex.toString();
-    }
-    public static byte[] subByte(byte[] b, int off, int length) {
-        byte[] b1 = new byte[length];
-        System.arraycopy(b, off, b1, 0, length);
-        return b1;
-    }
-
-    public static byte[] toSeed(List<String> words, String passphrase) {
-        checkNotNull(passphrase, "A null passphrase is not allowed.");
-
-        // To create binary seed from mnemonic, we use PBKDF2 function
-        // with mnemonic sentence (in UTF-8) used as a password and
-        // string "mnemonic" + passphrase (again in UTF-8) used as a
-        // salt. Iteration count is set to 4096 and HMAC-SHA512 is
-        // used as a pseudo-random function. Desired length of the
-        // derived key is 512 bits (= 64 bytes).
-        //
-        String pass = org.bitcoinj.core.Utils.SPACE_JOINER.join(words);
-        String salt = "mnemonic" + passphrase;
-
-        final Stopwatch watch = Stopwatch.createStarted();
-        byte[] seed = PBKDF2SHA512.derive(pass, salt, 2048, 32);
-        watch.stop();
-        return seed;
     }
 }
