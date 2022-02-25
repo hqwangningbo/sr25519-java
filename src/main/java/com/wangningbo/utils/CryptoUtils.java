@@ -4,13 +4,13 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.wangningbo.SR25519;
 import com.wangningbo.pojo.DecodeResult;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.PBKDF2SHA512;
 
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 
 
@@ -25,7 +25,7 @@ public class CryptoUtils {
     }
     public static DecodeResult decodePkcs8(String encoded, String password) {
         SR25519 sr25519 = new SR25519();
-        byte[] encrypted = Base64.getDecoder().decode(encoded);
+        byte[] encrypted = Base64.decodeBase64(encoded);
         byte[] salt = new byte[32];
         System.arraycopy(encrypted,0,salt,0,32);
         byte[] scrypt_password = new byte[64];
